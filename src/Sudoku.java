@@ -5,24 +5,22 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Random;
-import java.util.Set;
 import java.awt.BorderLayout;
 import java.awt.Color;
 
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.UIManager;
-
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 public class Sudoku extends JFrame{
 	
 	static final int GRIDSIZE = 9;
-	static final int NUMEMPTY = 36;
+	int numEmpty = 0;
 	private Cell [][] grid = new Cell[GRIDSIZE][GRIDSIZE];
 
 	
@@ -111,6 +109,10 @@ public class Sudoku extends JFrame{
 	ArrayList<Integer> rows13Box8 = new ArrayList<>();
 	ArrayList<Integer> rows12Box8 = new ArrayList<>();
 	
+	ArrayList<Integer> setGrid = new ArrayList<>();
+	ArrayList<Integer> yourGrid = new ArrayList<>();
+	int yourNum = 0;
+	
 	public Sudoku() {
 		initGUI();
 		
@@ -156,7 +158,6 @@ public class Sudoku extends JFrame{
 				});
 				
 				centerPanel.add(grid[r][c]);
-				//System.out.println(r + "" + c);
 			}
 		}
 		
@@ -169,30 +170,45 @@ public class Sudoku extends JFrame{
 		add(buttonPanel, BorderLayout.PAGE_END);
 		JButton newPuzzleButton = new JButton("New Puzzle");
 		newPuzzleButton.setFocusable(false);
+		newPuzzleButton.setBackground(Color.white);
 		newPuzzleButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				newPuzzle();
 			}
 		});
-		buttonPanel.add(newPuzzleButton, BorderLayout.CENTER);
-		
+		buttonPanel.add(newPuzzleButton);
 	}
 	
 	public void clickedCell(int r, int c) {
 		if (!grid[r][c].hasSetNumber()) {
 			grid[r][c].increaseNumClicked();
 		}
+		checkAnswer(setGrid);
 	}
 	
 	private void newPuzzle() {
-		for (int r = 0; r < GRIDSIZE; r++) {
-			for (int c = 0; c < GRIDSIZE; c++) {
-				//grid[r][c].reset();
-			}
-		}
 		resetAll();
+		UIManager.put("OptionPane.background", Color.black);
+        UIManager.put("Panel.background", Color.black);
+        UIManager.put("Button.background", Color.white);
+        UIManager.put("Button.foreground", Color.black);
+        JLabel difficultyLabel = new JLabel("Select a difficulty", JLabel.CENTER);
+        difficultyLabel.setForeground(Color.white);
+		String[] options = {"Easy", "Medium", "Hard"};
+        int x = JOptionPane.showOptionDialog(null, difficultyLabel,
+        		"Difficulty", JOptionPane.DEFAULT_OPTION, 
+        		JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+        if (x == 0) {
+        		numEmpty = 36;
+        } else if (x == 1) {
+        		numEmpty = 45;
+        } else if (x == 2) {
+        		numEmpty = 54;
+        } 
 		generatePuzzle();
+		
+		
 	}
 	
 	public void generatePuzzle() {
@@ -483,8 +499,6 @@ public class Sudoku extends JFrame{
 		rows12Box7.addAll(row2Box7);
 		
 		
-		//----------FIFTH BOX----------
-		
 		for (int i = 0; i < 6; i++) {
 			if (i < 3) {
 				cols23Box2.add(Integer.parseInt(grid[i][4].getNumShown()));
@@ -517,8 +531,29 @@ public class Sudoku extends JFrame{
 			}
 		}
 
-		//----------SIXTH BOX AND ON---------
+		//----------FINISH BOXES---------
 		makeUpToBox9();
+		
+		//make array of all the nums //row by row 1-81
+		
+		for (int r = 0; r < GRIDSIZE; r++) { 
+			for (int c = 0; c < GRIDSIZE; c++) {
+				setGrid.add(Integer.parseInt(grid[r][c].getNumShown()));
+			}
+		}
+		
+		//empty out some cells
+		Random random = new Random();
+		int randomRow = 0;
+		int randomCol = 0;
+		for (int i = 0; i < numEmpty; i++) {
+			randomRow = random.nextInt(GRIDSIZE);
+			randomCol = random.nextInt(GRIDSIZE);
+			grid[randomRow][randomCol].emptyNumber();
+			grid[randomRow][randomCol].setNumber(false);
+		}
+		
+		
 		
 	}
 	
@@ -549,7 +584,37 @@ public class Sudoku extends JFrame{
 		 }
 		 return list;
 	   }
-	 
+	
+	 public void checkAnswer(ArrayList<Integer> list) { //put in the list of numshown
+		 //make it here
+		 //make 2D array of the numShown 
+		 for (int r = 0; r < GRIDSIZE; r++) { 
+			for (int c = 0; c < GRIDSIZE; c++) {
+				if (grid[r][c].getNumShown() == "") {
+					yourNum = 0;
+				} else {
+					yourNum = Integer.parseInt(grid[r][c].getNumShown());
+				}
+				yourGrid.add(yourNum);
+			}
+		}
+		
+		if (yourGrid.equals(list)) {
+			UIManager.put("OptionPane.background", Color.white);
+	        UIManager.put("Panel.background", Color.white);
+	        UIManager.put("Button.background", Color.white);
+	        UIManager.put("Button.foreground", Color.black);
+	        JLabel congratsLabel = new JLabel("", JLabel.CENTER);
+	        congratsLabel.setForeground(Color.black);
+	        ImageIcon congrats = new ImageIcon("congrats.gif");
+			Object[] options = {"New Game", "Exit"};
+			int n = JOptionPane.showOptionDialog(null, congratsLabel, "", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, congrats, options, options[0]);
+			if (n == 0) {
+				newPuzzle();
+			}
+		} 
+		yourGrid.clear();
+	}
 	 
 	public void makeUpToElement33() { //A OF BOX5
 		int index33 = rand.nextInt(intersection(box5, rows23Box4, cols23Box2).size());
@@ -1087,10 +1152,16 @@ public class Sudoku extends JFrame{
 		rows23Box8.clear();
 		rows13Box8.clear();
 		rows12Box8.clear();
+		
+		for (int r = 0; r < GRIDSIZE; r++) {
+			for (int c = 0; c < GRIDSIZE; c++) {
+				grid[r][c].reset();
+			}
+		}
+		setGrid.clear();
+		yourGrid.clear();
+		yourNum = 0;
 	}
-	
-	
-
 
 	public static void main(String[] args) {
 		try {

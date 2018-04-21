@@ -68,14 +68,13 @@ public class Cell extends JButton{
 		} else {
 			numShown = Integer.toString(numClicked%10);
 		}
-		//System.out.println(numShown);
 		
 		changeNumShown(numShown);
 	}
 	
 	public void changeNumShown(String s) {
 		numShown = s;
-		numLabel.setText(s);
+		numLabel.setText(numShown);
 	}
 	
 	public boolean hasSetNumber() {
@@ -86,10 +85,22 @@ public class Cell extends JButton{
 		setNum = h;
 	}
 	
+	public void emptyNumber() {
+		changeNumShown("");
+		numLabel.setForeground(Color.blue);
+	}
+	
 	public boolean isWall(int index){ // is there a wall there?
 		return wall[index];
 	}
 	
+	public void reset() {
+		numClicked = 0;
+		changeNumShown("");
+		
+		setNum = true;
+		numLabel.setForeground(Color.black);
+	}
 	
 	//@Override
 	public void paintComponent(Graphics g){
@@ -125,14 +136,5 @@ public class Cell extends JButton{
 		
 		
 	}
-	/*
-	public void reset() {
-		int row = 0;
-		int col = 0;
-		int num = 0;
-		int numClicked = 0;
-		
-		boolean hasNum = false;
-	}*/
-
+	
 }
