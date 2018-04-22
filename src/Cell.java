@@ -2,6 +2,7 @@ import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
@@ -19,7 +20,7 @@ public class Cell extends JButton{
 
 	//variables
 	
-	private static int SIZE = 30;
+	private static int SIZE = 50;
 	private int row = 0;
 	private int col = 0;
 	private int numClicked = 0;
@@ -36,10 +37,9 @@ public class Cell extends JButton{
 		col = c;
 		
 		numLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
+		Font labelFont = new Font ("Arial", Font.PLAIN, SIZE/2);
+		numLabel.setFont(labelFont);
 		add(numLabel);
-		
-		Dimension size = new Dimension(SIZE, SIZE);
-		setPreferredSize(size);
 		
 		setBorder(null);
 	}
@@ -102,6 +102,11 @@ public class Cell extends JButton{
 		numLabel.setForeground(Color.black);
 	}
 	
+	@Override
+	public Dimension getPreferredSize(){
+		return new Dimension (SIZE, SIZE);
+	}
+	
 	//@Override
 	public void paintComponent(Graphics g){
 		//draw the background
@@ -127,7 +132,7 @@ public class Cell extends JButton{
 			if (col == 2 || col == 5) {
 				g2.setStroke(new BasicStroke(5));
 				g2.drawLine(SIZE, 0, SIZE, SIZE);
-			} else {
+			} else if (col != 8){
 				g2.setStroke(new BasicStroke(1));
 				g2.drawLine(SIZE, 0, SIZE, SIZE);
 				
